@@ -70,6 +70,16 @@ class Airtable
         return $this->api->delete($id);
     }
 
+    public function createMultiple(array $data)
+    {
+        return $this->api->createMultiple($data);
+    }
+
+    public function deleteMultiple(array $recordIds)
+    {
+        return $this->api->deleteMultiple($recordIds);
+    }
+
     public function get(array $fields = [])
     {
         if ($fields) {

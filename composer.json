@@ -1,18 +1,18 @@
 {
-    "name": "tapp/laravel-airtable",
+    "name": "nao-kitagawa/laravel-airtable",
     "description": "Laravel Airtable SDK",
     "keywords": [
-        "tapp",
+        "nao-kitagawa",
         "airtable",
         "laravel"
     ],
-    "homepage": "https://github.com/tapp/laravel-airtable",
+    "homepage": "https://github.com/nao-kitagawa/laravel-airtable",
     "license": "MIT",
     "type": "library",
     "authors": [
         {
             "name": "Steve Williamson",
-            "email": "steve@tappnetwork.com"
+            "email": "steve@nao-kitagawa.com"
         }
     ],
     "require": {

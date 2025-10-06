@@ -13,4 +13,8 @@ interface ApiClient
     public function patch(string $id, $contents = null);
 
     public function delete(string $id);
+
+    public function createMultiple(array $data);
+
+    public function deleteMultiple(array $recordIds);
 }

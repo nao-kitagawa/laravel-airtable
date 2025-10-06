@@ -280,7 +280,7 @@ class AirtableApiClient implements ApiClient
         ], $url);
 
         if ($query_params = $this->getQueryParams()) {
-            $url .= '?'.http_build_query($query_params);
+            $url .= '?' . http_build_query($query_params);
         }
 
         return $url;
@@ -291,7 +291,7 @@ class AirtableApiClient implements ApiClient
         $query_params = [];
 
         if ($this->filters) {
-            $query_params['filterByFormula'] = 'AND('.implode(',', $this->filters).')';
+            $query_params['filterByFormula'] = 'AND(' . implode(',', $this->filters) . ')';
         }
 
         if ($this->fields) {
@@ -311,5 +311,89 @@ class AirtableApiClient implements ApiClient
         }
 
         return $query_params;
+    }
+
+    public function createMultiple(array $data)
+    {
+        $records = [];
+
+        $chunks = array_chunk($data, 10);
+
+        foreach ($chunks as $key => $dataChunk) {
+            $contents = [];
+
+            foreach ($dataChunk as $dataRow) {
+                $contents[] = (object) [
+                    'fields' => (object) $dataRow,
+                ];
+            }
+
+            $params = [
+                'records' => $contents,
+                'typecast' => $this->typecast,
+            ];
+
+            $responseData = $this->decodeResponse(
+                $this->client->post($this->getEndpointUrl(), $params)
+            );
+
+            // 2. Xử lý lỗi
+            if ($responseData->has('error')) {
+                return $responseData;
+            }
+
+            if ($responseData->has('records')) {
+                $records += $responseData->get('records');
+            }
+
+            if (isset($chunks[$key + 1])) {
+                usleep($this->delay);
+            }
+        }
+
+        return collect([
+            'records' => $records,
+        ]);
+    }
+
+    public function deleteMultiple(array $ids)
+    {
+        $records = [];
+
+        $chunks = array_chunk($ids, 10);
+
+        foreach ($chunks as $key => $chunk) {
+            $url = $this->getEndpointUrl();
+            $first = true;
+
+            foreach ($chunk as $id) {
+                if ($first) {
+                    $url .= '?records[]=' . $id;
+                } else {
+                    $url .= '&records[]=' . $id;
+                }
+                $first = false;
+            }
+
+            $responseData = $this->decodeResponse(
+                $this->client->delete($url)
+            );
+
+            if ($responseData->has('error')) {
+                return $responseData;
+            }
+
+            if ($responseData->has('records')) {
+                $records = array_merge($records, $responseData->get('records'));
+            }
+
+            if (isset($chunks[$key + 1])) {
+                usleep($this->delay);
+            }
+        }
+
+        return collect([
+            'records' => $records,
+        ]);
     }
 }
